@@ -9,6 +9,7 @@ RUN pip install higlass-python clodius
 
 COPY binning.py /usr/src/app/binning.py
 COPY server.py /usr/src/app/server.py
+COPY fvz2.csv /usr/src/app/fvz2.csv
 
 RUN pip install Werkzeug==2.0.0
 RUN pip install flask==2.1.3
