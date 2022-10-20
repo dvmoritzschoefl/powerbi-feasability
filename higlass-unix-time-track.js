@@ -4537,9 +4537,7 @@ function diverging(interpolator) {
 
 
 
-// CONCATENATED MODULE: ./src/UnixTimeTrack.js
-var _slicedToArray = function () { function sliceIterator(arr, i) { var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"]) _i["return"](); } finally { if (_d) throw _e; } } return _arr; } return function (arr, i) { if (Array.isArray(arr)) { return arr; } else if (Symbol.iterator in Object(arr)) { return sliceIterator(arr, i); } else { throw new TypeError("Invalid attempt to destructure non-iterable instance"); } }; }();
-
+// CONCATENATED MODULE: ./src/UnixTimeTrackScale.js
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -4551,27 +4549,23 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 
 
 
-var UnixTimeTrack_durationSecond = 1000;
-var UnixTimeTrack_durationMinute = UnixTimeTrack_durationSecond * 60;
-var UnixTimeTrack_durationHour = UnixTimeTrack_durationMinute * 60;
-var UnixTimeTrack_durationDay = UnixTimeTrack_durationHour * 24;
-var UnixTimeTrack_durationWeek = UnixTimeTrack_durationDay * 7;
-var UnixTimeTrack_durationYear = UnixTimeTrack_durationDay * 365;
+var UnixTimeTrackScale_durationSecond = 1000;
+var UnixTimeTrackScale_durationMinute = UnixTimeTrackScale_durationSecond * 60;
+var UnixTimeTrackScale_durationHour = UnixTimeTrackScale_durationMinute * 60;
+var UnixTimeTrackScale_durationDay = UnixTimeTrackScale_durationHour * 24;
+var UnixTimeTrackScale_durationWeek = UnixTimeTrackScale_durationDay * 7;
+var UnixTimeTrackScale_durationYear = UnixTimeTrackScale_durationDay * 365;
 
-var UnixTimeTrack_formatSecond = utcFormat('%Y %b %d (%I:%M:%S %p)');
-var UnixTimeTrack_formatMinute = utcFormat('%Y %b %d (%I:%M %p)');
-var UnixTimeTrack_formatHour = utcFormat('%Y %b %d (%I %p)');
-var UnixTimeTrack_formatDay = utcFormat('%Y %b %d');
-var UnixTimeTrack_formatWeek = utcFormat('%Y %b');
-var UnixTimeTrack_formatMonth = utcFormat('%Y');
-var UnixTimeTrack_formatYear = utcFormat('');
+var UnixTimeTrackScale_formatSecond = utcFormat('%Y %b %d (%I:%M:%S %p)');
+var UnixTimeTrackScale_formatMinute = utcFormat('%Y %b %d (%I:%M %p)');
+var UnixTimeTrackScale_formatHour = utcFormat('%Y %b %d (%I %p)');
+var UnixTimeTrackScale_formatDay = utcFormat('%Y %b %d');
+var UnixTimeTrackScale_formatWeek = utcFormat('%Y %b');
+var UnixTimeTrackScale_formatMonth = utcFormat('%Y');
+var UnixTimeTrackScale_formatYear = utcFormat('');
 
-var ZOOM_LEVEL_YEAR = 0;
-var ZOOM_LEVEL_WEEK = 1;
-var ZOOM_LEVEL_DAY = 2;
-
-function UnixTimeTrack_timeFormat(date, timeDelta) {
-  return (timeDelta < UnixTimeTrack_durationSecond ? UnixTimeTrack_formatSecond : timeDelta < UnixTimeTrack_durationMinute ? UnixTimeTrack_formatMinute : timeDelta < UnixTimeTrack_durationHour ? UnixTimeTrack_formatHour : timeDelta < UnixTimeTrack_durationDay ? UnixTimeTrack_formatDay : timeDelta < UnixTimeTrack_durationWeek ? UnixTimeTrack_formatWeek : timeDelta < UnixTimeTrack_durationYear ? UnixTimeTrack_formatMonth : UnixTimeTrack_formatYear)(date);
+function UnixTimeTrackScale_timeFormat(date, timeDelta) {
+  return (timeDelta < UnixTimeTrackScale_durationSecond ? UnixTimeTrackScale_formatSecond : timeDelta < UnixTimeTrackScale_durationMinute ? UnixTimeTrackScale_formatMinute : timeDelta < UnixTimeTrackScale_durationHour ? UnixTimeTrackScale_formatHour : timeDelta < UnixTimeTrackScale_durationDay ? UnixTimeTrackScale_formatDay : timeDelta < UnixTimeTrackScale_durationWeek ? UnixTimeTrackScale_formatWeek : timeDelta < UnixTimeTrackScale_durationYear ? UnixTimeTrackScale_formatMonth : UnixTimeTrackScale_formatYear)(date);
 }
 
 var tickHeight = 10;
@@ -4579,7 +4573,7 @@ var textHeight = 10;
 var betweenTickAndText = 10;
 var betweenCenterTickAndText = 20;
 
-var UnixTimeTrack_UnixTimeTrack = function UnixTimeTrack(HGC) {
+var UnixTimeTrackScale_UnixTimeTrackScale = function UnixTimeTrackScale(HGC) {
   for (var _len = arguments.length, args = Array(_len > 1 ? _len - 1 : 0), _key = 1; _key < _len; _key++) {
     args[_key - 1] = arguments[_key];
   }
@@ -4599,7 +4593,6 @@ var UnixTimeTrack_UnixTimeTrack = function UnixTimeTrack(HGC) {
 
       var _this = _possibleConstructorReturn(this, (UnixTimeTrackClass.__proto__ || Object.getPrototypeOf(UnixTimeTrackClass)).call(this, scene, dataConfig, handleTilesetInfoReceived, trackConfig.options, animate));
 
-      _this.zoomLevel = 0;
       _this.axisTexts = [];
       _this.endpointsTexts = [];
       _this.axisTextFontFamily = 'Arial';
@@ -4613,54 +4606,10 @@ var UnixTimeTrack_UnixTimeTrack = function UnixTimeTrack(HGC) {
       _this.context.anchor.y = 0.4;
       _this.context.anchor.x = 0.5;
       _this.pMain.addChild(_this.context);
-
-      _this.zoomText = new PIXI.Text('', {
-        fontSize: '16px',
-        fontFamily: _this.axisTextFontFamily,
-        fill: 'red'
-      });
-
-      _this.pMain.addChild(_this.zoomText);
-
-      _this.zoomText.x = 16;
-      _this.zoomText.y = 120;
       return _this;
     }
 
     _createClass(UnixTimeTrackClass, [{
-      key: 'initTile',
-      value: function initTile() {}
-    }, {
-      key: 'getMouseOverHtml',
-      value: function getMouseOverHtml(trackX) {
-        var _this2 = this;
-
-        var dataX = this._xScale.invert(trackX);
-
-        var found = null;
-        var min = Number.MAX_VALUE;
-
-        this.visibleTiles.forEach(function (visible) {
-          if (visible.tileId in _this2.fetchedTiles) {
-            var fetched = _this2.fetchedTiles[visible.tileId];
-            var samples = fetched.tileData.samples;
-
-            samples.forEach(function (sample) {
-              if (Math.abs(sample[0] - dataX) < min) {
-                min = Math.abs(sample[0] - dataX);
-                found = sample;
-              }
-            });
-          }
-        });
-
-        if (found) {
-          return '' + found[1];
-        }
-
-        return undefined;
-      }
-    }, {
       key: 'updateTimeScale',
       value: function updateTimeScale() {
         var linearScale = this._xScale.copy();
@@ -4705,16 +4654,16 @@ var UnixTimeTrack_UnixTimeTrack = function UnixTimeTrack(HGC) {
     }, {
       key: 'drawTicks',
       value: function drawTicks(tickStartY, tickEndY) {
-        var _this3 = this;
+        var _this2 = this;
 
         this.timeScale.ticks().forEach(function (tick, i) {
-          var xPos = _this3.position[0] + _this3.timeScale(tick);
+          var xPos = _this2.position[0] + _this2.timeScale(tick);
 
-          _this3.pMain.moveTo(xPos, _this3.position[1] + tickStartY);
-          _this3.pMain.lineTo(xPos, _this3.position[1] + tickEndY);
+          _this2.pMain.moveTo(xPos, _this2.position[1] + tickStartY);
+          _this2.pMain.lineTo(xPos, _this2.position[1] + tickEndY);
 
-          _this3.axisTexts[i].x = xPos;
-          _this3.axisTexts[i].y = _this3.position[1] + tickEndY + betweenTickAndText;
+          _this2.axisTexts[i].x = xPos;
+          _this2.axisTexts[i].y = _this2.position[1] + tickEndY + betweenTickAndText;
         });
       }
     }, {
@@ -4725,7 +4674,7 @@ var UnixTimeTrack_UnixTimeTrack = function UnixTimeTrack(HGC) {
         var tickDiff = +ticks[1] - +ticks[0];
 
         var xPos = this.position[0] + this.timeScale(center);
-        this.context.text = UnixTimeTrack_timeFormat(center, tickDiff);
+        this.context.text = UnixTimeTrackScale_timeFormat(center, tickDiff);
         this.context.x = xPos;
         this.context.y = this.position[1] + tickEndY + betweenCenterTickAndText;
         if (this.context.text !== ' ') {
@@ -4736,22 +4685,9 @@ var UnixTimeTrack_UnixTimeTrack = function UnixTimeTrack(HGC) {
     }, {
       key: 'draw',
       value: function draw() {
-        var _this4 = this;
-
         var graphics = this.pMain;
         graphics.clear();
         graphics.lineStyle(1, 0x000000, 1);
-
-        this.visibleTiles.forEach(function (visible) {
-          if (visible.tileId in _this4.fetchedTiles) {
-            var fetched = _this4.fetchedTiles[visible.tileId];
-            var samples = fetched.tileData.samples;
-
-            samples.forEach(function (sample) {
-              graphics.drawRect(_this4.timeScale(sample[0]) - 1, 80 - sample[1] * 20, 2, sample[1] * 20);
-            });
-          }
-        });
 
         var tickStartY = (this.dimensions[1] - tickHeight - textHeight - betweenTickAndText) / 2;
         var tickEndY = tickStartY + tickHeight;
@@ -4761,68 +4697,6 @@ var UnixTimeTrack_UnixTimeTrack = function UnixTimeTrack(HGC) {
         this.drawTicks(tickStartY, tickEndY);
         this.drawContext(tickStartY, tickEndY);
       }
-    }, {
-      key: 'tileToLocalId',
-      value: function tileToLocalId(tile) {
-        return tile;
-      }
-    }, {
-      key: 'tileToRemoteId',
-      value: function tileToRemoteId(tile) {
-        // eslint-disable-next-line no-unused-vars
-        var _tile$split = tile.split('.'),
-            _tile$split2 = _slicedToArray(_tile$split, 4),
-            _ = _tile$split2[0],
-            z = _tile$split2[1],
-            x = _tile$split2[2],
-            y = _tile$split2[3];
-
-        return z + '.' + x + '.' + y;
-      }
-    }, {
-      key: 'calculateVisibleTiles',
-      value: function calculateVisibleTiles() {
-        this.calculateZoomLevel();
-
-        var resolution = this.tilesetInfo.resolutions[this.zoomLevel];
-
-        var minX = this.tilesetInfo.min_pos[0];
-        var maxX = this.tilesetInfo.max_pos[0];
-
-        var epsilon = 0.000001;
-        var tileWidth = resolution;
-
-        var lowerBound = Math.max(0, Math.floor((this.timeScale.domain()[0] - minX) / tileWidth));
-        var upperBound = Math.max(0, Math.ceil(Math.min(maxX, this.timeScale.domain()[1] - minX - epsilon) / tileWidth));
-
-        var tiles = [];
-        for (var i = lowerBound; i <= upperBound; i++) {
-          tiles.push('michael.' + this.zoomLevel + '.' + i + '.' + 0);
-        }
-
-        this.setVisibleTiles(tiles);
-      }
-    }, {
-      key: 'calculateZoomLevel',
-      value: function calculateZoomLevel() {
-        var _timeScale$domain = this.timeScale.domain(),
-            _timeScale$domain2 = _slicedToArray(_timeScale$domain, 2),
-            l = _timeScale$domain2[0],
-            r = _timeScale$domain2[1];
-
-        var days = (r - l) / (1000 * 60 * 60 * 24);
-
-        if (days > 365) {
-          this.zoomLevel = ZOOM_LEVEL_YEAR;
-          this.zoomText.text = 'resolution: YEAR';
-        } else if (days > 14) {
-          this.zoomLevel = ZOOM_LEVEL_WEEK;
-          this.zoomText.text = 'resolution: WEEK';
-        } else {
-          this.zoomLevel = ZOOM_LEVEL_DAY;
-          this.zoomText.text = 'resolution: DAY';
-        }
-      }
 
       /* --------------------------- Getter / Setter ---------------------------- */
 
@@ -4831,15 +4705,6 @@ var UnixTimeTrack_UnixTimeTrack = function UnixTimeTrack(HGC) {
       value: function zoomed(newXScale, newYScale) {
         this.xScale(newXScale);
         this.yScale(newYScale);
-
-        if (!this.tilesetInfo) {
-          return;
-        }
-
-        this.calculateZoomLevel();
-        this.calculateVisibleTiles();
-
-        this.refreshTiles();
 
         this.draw();
       }
@@ -4851,25 +4716,25 @@ var UnixTimeTrack_UnixTimeTrack = function UnixTimeTrack(HGC) {
   return new (Function.prototype.bind.apply(UnixTimeTrackClass, [null].concat(args)))();
 };
 
-UnixTimeTrack_UnixTimeTrack.config = {
-  type: 'unix-time-track',
+UnixTimeTrackScale_UnixTimeTrackScale.config = {
+  type: 'unix-time-scale',
   datatype: [],
   orientation: '1d-horizontal',
-  name: 'UnixTime',
+  name: 'UnixTimeTrack',
   availableOptions: [],
   defaultOptions: {}
 };
 
-/* harmony default export */ var src_UnixTimeTrack = (UnixTimeTrack_UnixTimeTrack);
+/* harmony default export */ var src_UnixTimeTrackScale = (UnixTimeTrackScale_UnixTimeTrackScale);
 // CONCATENATED MODULE: ./src/index.js
 
 
 
 
 src({
-  name: 'UnixTimeTrack',
-  track: src_UnixTimeTrack,
-  config: src_UnixTimeTrack.config
+  name: 'UnixTimeTrackScale',
+  track: src_UnixTimeTrackScale,
+  config: src_UnixTimeTrackScale.config
 });
 
 /***/ })

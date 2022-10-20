@@ -1,50 +1,43 @@
 # Example script that bins data with a timestamp to a set of tiles
+from unicodedata import digit
 import numpy as np
 import pandas as pd
 from higlass import Tileset
 import time
 from datetime import datetime
-from numpy.random import default_rng
 
-print("start")
-
+# Preprocess data
 test_data = pd.read_csv(filepath_or_buffer='fvz2.csv', sep=';', low_memory=False)
-test_data = test_data[['zeitstempel', 'vorstemp']]
-test_data['zeitstempel'].dropna(inplace=True)
-print(test_data.head())
-print(test_data['zeitstempel'])
-test_data['zeitstempel'] = test_data['zeitstempel'].transform(lambda x: datetime.fromisoformat(x).timestamp() * 1000)
-print(test_data['zeitstempel'])
+test_data = test_data[['zeitstempel', 'vorstemp', 'rts_tau', 'rus_tauk', 'rus_taus', 'laenge_bbwz', 'beizgeschwindigkeit']]
+test_data.dropna(inplace=True)
+test_data['zeitstempel'] = test_data['zeitstempel'].transform(lambda x: datetime.fromisoformat(x).timestamp() * 1000.0)
 test_data.rename(columns={'zeitstempel': 'timestamp', 'vorstemp': 'value'}, inplace=True)
-print("Hello")
+
+print(test_data.head())
+print(test_data.columns)
+
+header = list(test_data.columns)
 
 year_resolution = 60 * 60 * 24 * 365 * 1000
 
-rng = default_rng()
 
-
+maximums = {}
+minimums = {}
+for column in header:
+    maximums[column] = test_data[column].max()
+    minimums[column] = test_data[column].min()
 
 memory_tiles = {
 }
 
 
-length = 1000000
-
-# create dataframe of test data
-#df = pd.DataFrame({
-#    'timestamp': np.floor((np.random.random((length,)) * 31556952000 * 4) + 1663157371591),
-#    'value': np.random.random((length,)),
-#})
 df = test_data
+
 # sort data by timestamp
 df.sort_values(by=['timestamp'], inplace=True)
 
-print('hello')
-print(df['timestamp'].max() / 1000)
-print(time.time())
-
-lower_bound = datetime.fromtimestamp(df['timestamp'].min() / 1000)
-upper_bound = datetime.fromtimestamp(df['timestamp'].max() / 1000)
+lower_bound = datetime.fromtimestamp(df['timestamp'].min() / 1000.0)
+upper_bound = datetime.fromtimestamp(df['timestamp'].max() / 1000.0)
 
 lower_bound = lower_bound.replace(month=1, day=1, hour=0, minute=0, second=0, microsecond=0)
 upper_bound = upper_bound.replace(year=upper_bound.year + 1, month=1, day=1, hour=0, minute=0, second=0, microsecond=0)
@@ -52,65 +45,92 @@ upper_bound = upper_bound.replace(year=upper_bound.year + 1, month=1, day=1, hou
 print(lower_bound)
 print(upper_bound)
 
-n_bins = upper_bound.year - lower_bound.year
 
-data = df['timestamp'].to_numpy()
-year_bins = np.linspace(datetime.timestamp(lower_bound) * 1000, datetime.timestamp(upper_bound) * 1000, n_bins + 1)
-digitized = np.digitize(data, year_bins) - 1
 
-print(digitized)
+numpyTimestamps = df['timestamp'].to_numpy()
 
-numpied = df.to_numpy()
 
-for i in range(0, n_bins):
-    bin_data = numpied[digitized == i]
-    #print(bin_data.mean(axis=0)[1])
-
-    choices = rng.choice(len(bin_data), size=min(len(bin_data), 30), replace=False)
-    subsamples = bin_data[choices]
-    print(f'binned {i}')
-
-    memory_tiles[f'0.{i}.{0}'] = {
-        'samples': subsamples
-    }
+numpyFullFrame = df.to_numpy()
 
 
 
-n_bins = (upper_bound.year - lower_bound.year) * 100
-week_bins = np.linspace(datetime.timestamp(lower_bound) * 1000, datetime.timestamp(upper_bound) * 1000, n_bins + 1)
-digitized = np.digitize(data, week_bins) - 1
-
-for i in range(0, n_bins):
-    bin_data = numpied[digitized == i]
-
-    choices = rng.choice(len(bin_data), size=min(len(bin_data), 30), replace=False)
-    subsamples = bin_data[choices]
-    #print(subsamples)
-
-    print(f'binned {i}')
-
-    memory_tiles[f'1.{i}.{0}'] = {
-        'samples': subsamples
-    }
 
 
 
-n_bins = (upper_bound.year - lower_bound.year) * 365
-day_bins = np.linspace(datetime.timestamp(lower_bound) * 1000, datetime.timestamp(upper_bound) * 1000, n_bins + 1)
-digitized = np.digitize(data, day_bins) - 1
+def aggregationSamples(timestamps, fullFrame, start, end, n_bins):
+    samples = []
 
-for i in range(0, n_bins):
-    bin_data = numpied[digitized == i]
+    bins = np.linspace(start, end, n_bins + 1)
+    digitized = np.digitize(timestamps, bins) - 1
 
-    choices = rng.choice(len(bin_data), size=min(len(bin_data), 30), replace=False)
-    subsamples = bin_data[choices]
-    #print(subsamples)
+    time_step = (end - start) / n_bins
 
-    print(f'binned {i}')
+    for i in range(0, n_bins):
+        bin_data: np.ndarray = fullFrame[digitized == i]
+        sample = {}
+        if len(bin_data) > 30:
+            means = bin_data.mean(axis=0)
+            max = bin_data.max(axis=0)
+            min = bin_data.min(axis=0)
+            quantiles = np.quantile(bin_data, [0.0, 0.25, 0.5, 0.75, 1.0], axis=0)
 
-    memory_tiles[f'2.{i}.{0}'] = {
-        'samples': subsamples
-    }
+            for j in range(0, len(header)):
+                sample['max'] = {}
+                sample['min'] = {}
+                sample['quantile'] = {}
+                sample['mean'] = {}
+                
+
+            for j in range(0, len(header)):
+                sample['mean'][header[j]] = means[j]
+                sample['max'][header[j]] = max[j]
+                sample['min'][header[j]] = min[j]
+                sample['quantile'][header[j]] = list(quantiles[:, j])
+        else:
+            sample['individuals'] = {
+                'header': header,
+                'sparse': bin_data.tolist()
+            }
+            if (len(bin_data.tolist()) > 0):
+                print(bin_data[:, 0].tolist())
+                print('\n')
+
+        sample['start'] = start + time_step * i
+        sample['end'] = start + time_step * (i + 1)
+        samples += [sample]
+
+    return samples
+
+
+z = 0
+for n_bins in [upper_bound.year - lower_bound.year, (upper_bound.year - lower_bound.year) * 30,
+    (upper_bound.year - lower_bound.year) * 365, (upper_bound.year - lower_bound.year) * 1000,
+    (upper_bound.year - lower_bound.year) * 10000]:
+    bins = np.linspace(datetime.timestamp(lower_bound) * 1000.0, datetime.timestamp(upper_bound) * 1000.0, n_bins + 1)
+    digitized = np.digitize(numpyTimestamps, bins) - 1
+    time_step = ((datetime.timestamp(upper_bound) * 1000) - (datetime.timestamp(lower_bound) * 1000)) / n_bins
+
+
+    for i in range(0, n_bins):
+        # for each year... 
+        bin_data = numpyFullFrame[digitized == i]
+        binTimestamps = numpyTimestamps[digitized == i]
+
+        start = (datetime.timestamp(lower_bound) * 1000) + time_step * i
+        end = (datetime.timestamp(lower_bound) * 1000) + time_step * (i + 1)
+
+        subsamples = aggregationSamples(binTimestamps, bin_data, start, end, 12)
+
+        memory_tiles[f'{z}.{i}.{0}'] = {
+            'samples': subsamples,
+            'bounds': maximums,
+            'start': start,
+            'end': end
+        }
+
+    z = z + 1
+
+
 
 
 def dftimeseries(**kwargs):
@@ -122,7 +142,7 @@ def dftimeseries(**kwargs):
         'min_pos': [min, min],
         'max_pos': [max, max],
         'max_zoom': 5,
-        'resolutions': [year_resolution, year_resolution / 100, year_resolution / 365]
+        'resolutions': [year_resolution, year_resolution / 30, year_resolution / 365, year_resolution / 1000, year_resolution / 10000]
     }
     
     def tileset_info():
@@ -132,7 +152,7 @@ def dftimeseries(**kwargs):
         if f'{z}.{x}.{0}' in memory_tiles:
             return memory_tiles[f'{z}.{x}.{0}']
         else:
-            return { 'samples': np.array([]) }
+            return { 'samples': [], 'bounds': maximums, 'start': 0, 'end': 0 }
     
     def tiles(tile_ids):
         tiles = []
@@ -144,9 +164,9 @@ def dftimeseries(**kwargs):
             print('requesting')
             # generate the tile
             data = _get_tile(int(z), int(x), int(y))
- 
+
             # format the tile response
-            tiles.append((tile_id, { 'samples': data['samples'].tolist() }))
+            tiles.append((tile_id, { 'samples': data['samples'], 'bounds': data['bounds'], 'start': data['start'], 'end': data['end'] }))
 
         return tiles
 

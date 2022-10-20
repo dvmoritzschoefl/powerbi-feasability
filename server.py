@@ -1,7 +1,7 @@
 import logging
 from higlass import Server
 
-from binning import dftimeseries
+from binning_real_data import dftimeseries
 
 #from flask import Flask
 
@@ -18,8 +18,6 @@ def test_hitile():
     ts = dftimeseries(uuid='michael')
 
     print("finished creating time series tiles...")
-
-
 
     server = Server(
         [ts],

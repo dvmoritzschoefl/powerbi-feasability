@@ -12,7 +12,8 @@
   <!-- <script crossorigin src="https://unpkg.com/pixi.js-legacy@5/dist/pixi-legacy.min.js"></script> -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/react-bootstrap/0.32.1/react-bootstrap.min.js"></script>
 
-  <script src="higlass-unix-time-track/dist/higlass-unix-time-track.min.js"></script>
+  <script src="higlass-unix-time-track/dist/higlass-unix-time-track.js"></script>
+  <script src="higlass-unix-time-track.js"></script>
   <script src="https://unpkg.com/higlass-sequence/dist/higlass-sequence.js"></script>
   <script src="https://unpkg.com/higlass@1.6/dist/hglib.min.js"></script>
 
@@ -24,8 +25,6 @@
 
 <script>
 
-   console.log(hglib);
-
 const hgApi = hglib.viewer(
   document.getElementById('development-demo'),
   {
@@ -36,75 +35,85 @@ const hgApi = hglib.viewer(
   ],
   "views": [
     {
-      "uid": "aa",
       "initialXDomain": [
         1663303164,
         1726461564
       ],
       "tracks": {
         "top": [
+        {
+            "type": "unix-time-track",
+            "server": "http://localhost:8787/api/v1",
+            "title": "test",
+            "tilesetUid": "michael",
+            "width": 300,
+            "height": 150,
+            "options": {
+              "feature": ["laenge_bbwz"],
+              "visual": "boxplot"
+            }
+          },
           {
             "type": "unix-time-track",
             "server": "http://localhost:8787/api/v1",
             "tilesetUid": "michael",
             "width": 300,
-            "height": 100
-          }
-        ],
-        "left": [],
-        "center": [],
-        "right": [],
-        "bottom": [],
-        "whole": [
-          {
-            "type": "vertical-rule",
-            "x": 1000,
+            "height": 150,
             "options": {
-              "color": "lightgrey"
-            },
-            "uid": "vr1",
-            "width": 20,
-            "height": 20
+              "feature": ["rus_tauk"],
+              "visual": "mean",
+              "mark": "bar"
+            }
           },
           {
-            "type": "vertical-rule",
-            "x": 1001,
+            "type": "unix-time-track",
+            "server": "http://localhost:8787/api/v1",
+            "tilesetUid": "michael",
+            "width": 300,
+            "height": 150,
             "options": {
-              "color": "lightgrey"
-            },
-            "uid": "vr2",
-            "width": 20,
-            "height": 20
+              "feature": ["rts_tau"],
+              "visual": "mean",
+              "mark": "bar"
+            }
+          },
+          {
+            "type": "unix-time-track",
+            "server": "http://localhost:8787/api/v1",
+            "tilesetUid": "michael",
+            "width": 300,
+            "height": 150,
+            "options": {
+              "feature": ["rus_taus"],
+              "visual": "mean",
+              "mark": "bar"
+            }
+          },
+          {
+            "type": "unix-time-track",
+            "server": "http://localhost:8787/api/v1",
+            "tilesetUid": "michael",
+            "width": 300,
+            "height": 150,
+            "options": {
+              "feature": ["rus_tauk", "rts_tau","rus_taus"],
+              "visual": "mean",
+              "mark": "line"
+            }
           }
         ],
-        "gallery": []
-      },
-      "layout": {
-        "w": 12,
-        "h": 12,
-        "x": 0,
-        "y": 0,
-        "moved": false,
-        "static": false
-      },
-      "initialYDomain": [
-        763359369.803133,
-        763359727.735475
-      ]
+        "bottom": [
+          {
+            "type": "unix-time-scale",
+            "server": "http://localhost:8787/api/v1",
+            "width": 300,
+            "height": 50
+          }
+        
+        ]
+      }
     }
-  ],
-  "zoomLocks": {
-    "locksByViewUid": {},
-    "locksDict": {}
-  },
-  "locationLocks": {
-    "locksByViewUid": {},
-    "locksDict": {}
-  },
-  "valueScaleLocks": {
-    "locksByViewUid": {},
-    "locksDict": {}
-  }
+  ]
 }
 );
 
